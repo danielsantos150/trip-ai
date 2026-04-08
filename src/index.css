@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand: purple primary, neutral greys, semantic colors */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 14.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 14.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 14.9%;
+
+    /* Purple 600 as primary - high contrast on white */
+    --primary: 241.8 64.9% 58.6%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Purple 50 bg with purple 900 text for secondary */
+    --secondary: 224 88.2% 96.7%;
+    --secondary-foreground: 240 40.6% 34.3%;
+
+    /* Neutral muted */
+    --muted: 0 0% 96.5%;
+    --muted-foreground: 0 0% 46.7%;
+
+    /* Purple 100 accent */
+    --accent: 224.4 87.1% 93.9%;
+    --accent-foreground: 241.8 64.9% 58.6%;
+
+    /* Red for destructive */
+    --destructive: 0 70.4% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 88.6%;
+    --input: 0 0% 88.6%;
+    --ring: 241.8 64.9% 58.6%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar - dark purple */
+    --sidebar-background: 242.9 41.2% 20%;
+    --sidebar-foreground: 224 88.2% 96.7%;
+    --sidebar-primary: 241.8 64.9% 58.6%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 40.6% 34.3%;
+    --sidebar-accent-foreground: 224 88.2% 96.7%;
+    --sidebar-border: 241.8 46.9% 41.4%;
+    --sidebar-ring: 237.5 71.8% 66.7%;
+
+    /* Semantic tokens */
+    --success: 122.7 67.1% 45.3%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38.4 95.3% 50.2%;
+    --warning-foreground: 0 0% 14.9%;
+    --info: 184.2 59.6% 42.7%;
+    --info-foreground: 0 0% 100%;
+
+    /* Purple shades for gradients */
+    --purple-light: 224 88.2% 96.7%;
+    --purple-100: 224.4 87.1% 93.9%;
+    --purple-200: 227.2 82.5% 88.8%;
+    --purple-500: 237.5 71.8% 66.7%;
+    --purple-600: 241.8 64.9% 58.6%;
+    --purple-700: 243.3 50% 50.6%;
+    --purple-800: 241.8 46.9% 41.4%;
+    --purple-900: 240 40.6% 34.3%;
+    --purple-950: 242.9 41.2% 20%;
+
+    /* Teal for accents */
+    --teal-500: 184.2 59.6% 42.7%;
+    --teal-600: 186.8 57% 36.5%;
+  }
+
+  .dark {
+    --background: 0 0% 7.1%;
+    --foreground: 0 0% 96.5%;
+
+    --card: 0 0% 11.8%;
+    --card-foreground: 0 0% 96.5%;
+
+    --popover: 0 0% 11.8%;
+    --popover-foreground: 0 0% 96.5%;
+
+    --primary: 237.5 71.8% 66.7%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 242.9 41.2% 20%;
+    --secondary-foreground: 224 88.2% 96.7%;
+
+    --muted: 0 0% 17.3%;
+    --muted-foreground: 0 0% 56.9%;
+
+    --accent: 240 40.6% 34.3%;
+    --accent-foreground: 224 88.2% 96.7%;
+
+    --destructive: 0 60.3% 50.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 17.3%;
+    --input: 0 0% 17.3%;
+    --ring: 237.5 71.8% 66.7%;
+
+    --sidebar-background: 0 0% 7.1%;
+    --sidebar-foreground: 0 0% 96.5%;
+    --sidebar-primary: 237.5 71.8% 66.7%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 17.3%;
+    --sidebar-accent-foreground: 0 0% 96.5%;
+    --sidebar-border: 0 0% 17.3%;
+    --sidebar-ring: 237.5 71.8% 66.7%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer utilities {
+  .text-gradient-brand {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--purple-600)), hsl(var(--purple-500)));
+  }
+}
