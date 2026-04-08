@@ -7,13 +7,15 @@ import FlightCard from "@/components/results/FlightCard";
 import ResultsFilters, { FiltersState, defaultFilters } from "@/components/results/ResultsFilters";
 import SelectionsSummary from "@/components/wizard/SelectionsSummary";
 import TripCart from "@/components/results/TripCart";
+import MickeyEarsEasterEgg from "@/components/wizard/MickeyEarsEasterEgg";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, Loader2, AlertCircle, ChevronLeft, AlertTriangle, X, Home, Sparkles } from "lucide-react";
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, RefreshCw } from "lucide-react";
+import { Search, RefreshCw, Plane } from "lucide-react";
+import { toast } from "sonner";
 
 interface EmptyStateProps {
   type: "hotels" | "flights";
@@ -150,11 +152,30 @@ const Results = () => {
         show: true,
         total: newTotal,
         budget: budgetLimit,
-        onConfirm: () => { setSelectedHotel(hotel); setBudgetWarning(null); },
+        onConfirm: () => {
+          setSelectedHotel(hotel);
+          setBudgetWarning(null);
+          if (showFlights && !selectedFlight) {
+            setTimeout(() => {
+              setActiveTab("flights");
+              toast("✈️ Ótima escolha! Agora selecione um voo para completar sua trip.", { duration: 5000, position: "top-center" });
+            }, 400);
+          }
+        },
       });
       return;
     }
     setSelectedHotel(hotel);
+    // Guide user to select a flight next
+    if (showFlights && !selectedFlight) {
+      setTimeout(() => {
+        setActiveTab("flights");
+        toast("✈️ Ótima escolha! Agora selecione um voo para completar sua trip.", {
+          duration: 5000,
+          position: "top-center",
+        });
+      }, 400);
+    }
   };
 
   const toggleFlight = (flight: any) => {
@@ -224,7 +245,11 @@ const Results = () => {
   const [aiRecsLoading, setAiRecsLoading] = useState(false);
 
   useEffect(() => {
-    if (rawHotels.length === 0 && rawFlights.length === 0) return;
+    // Wait until hotels have loaded (and flights if user wants them)
+    const hotelsReady = !hotelsLoading && rawHotels.length > 0;
+    const flightsReady = !showFlights || (!flightsLoading && rawFlights.length > 0);
+    
+    if (!hotelsReady || !flightsReady) return;
     if (aiRecsLoading) return;
     
     const fetchRecs = async () => {
@@ -250,7 +275,7 @@ const Results = () => {
       }
     };
     fetchRecs();
-  }, [rawHotels.length, rawFlights.length]);
+  }, [hotelsLoading, flightsLoading, rawHotels.length, rawFlights.length]);
 
   // Build recommendation lookup maps from raw indices
   const hotelRecMap = useMemo(() => {
@@ -345,6 +370,7 @@ const Results = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <MickeyEarsEasterEgg destination={data.destination} />
       <div className="container mx-auto px-4 pt-20 pb-24">
         <div className="flex items-center gap-3 mb-4">
           <button

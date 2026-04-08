@@ -7,6 +7,7 @@ import { SearchProvider } from "@/contexts/SearchContext";
 import Index from "./pages/Index.tsx";
 import Wizard from "./pages/Wizard.tsx";
 import Results from "./pages/Results.tsx";
+import TripSummary from "./pages/TripSummary.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/wizard" element={<Wizard />} />
             <Route path="/results" element={<Results />} />
+            <Route path="/trip-summary" element={<TripSummary />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

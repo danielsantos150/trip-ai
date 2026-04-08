@@ -1,4 +1,5 @@
 import { useSearch } from "@/contexts/SearchContext";
+import { isDisneyDestination } from "@/components/wizard/MickeyEarsEasterEgg";
 import { MapPin, Calendar, Users, Baby, Dog, Star, Plane, Wine, Waves, Building, X, Wallet, Hotel, Home, BedDouble, Palmtree, Building2 } from "lucide-react";
 
 const accommodationLabels: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -88,19 +89,32 @@ const SelectionsSummary = () => {
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-card rounded-xl border p-4">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Suas escolhas</p>
-      <div className="flex flex-wrap gap-2">
-        {items.map((item, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-1.5 bg-accent text-accent-foreground px-3 py-1.5 rounded-full text-xs font-medium"
-          >
-            <span className="text-primary">{item.icon}</span>
-            <span>{item.value}</span>
-          </div>
-        ))}
+    <div className="space-y-2">
+      <div className="bg-card rounded-xl border p-4">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Suas escolhas</p>
+        <div className="flex flex-wrap gap-2">
+          {items.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-1.5 bg-accent text-accent-foreground px-3 py-1.5 rounded-full text-xs font-medium"
+            >
+              <span className="text-primary">{item.icon}</span>
+              <span>{item.value}</span>
+            </div>
+          ))}
+        </div>
       </div>
+
+      {isDisneyDestination(data.destination) && (
+        <div className="flex items-center gap-2 bg-gradient-to-r from-primary/10 to-accent rounded-xl border border-primary/20 px-4 py-2.5">
+          <span className="text-xl">🏰</span>
+          <div>
+            <p className="text-sm font-bold text-foreground">✨ Destino mágico detectado!</p>
+            <p className="text-xs text-muted-foreground">A magia Disney acompanha sua viagem</p>
+          </div>
+          <span className="text-xl ml-auto">✨</span>
+        </div>
+      )}
     </div>
   );
 };

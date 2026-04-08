@@ -1,12 +1,14 @@
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { ShoppingBag, Star, MapPin, Clock, ArrowRight, ExternalLink, Trash2, CalendarIcon, BrainCircuit, CheckCircle2, XCircle, AlertTriangle as AlertTriangleIcon, Loader2, Sparkles } from "lucide-react";
+import { ShoppingBag, Star, MapPin, Clock, ArrowRight, ExternalLink, Trash2, CalendarIcon, BrainCircuit, CheckCircle2, XCircle, AlertTriangle as AlertTriangleIcon, Loader2, Sparkles, FileDown, Maximize2 } from "lucide-react";
 import { useSearch } from "@/contexts/SearchContext";
+import { generateTripPdf } from "@/lib/generateTripPdf";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, addDays } from "date-fns";
@@ -30,6 +32,7 @@ const monthMap: Record<string, number> = {
 const TripCart = ({ selectedHotel, selectedFlight, onRemoveHotel, onRemoveFlight, budgetLimit }: TripCartProps) => {
   const [open, setOpen] = useState(false);
   const { data } = useSearch();
+  const navigate = useNavigate();
   const itemCount = (selectedHotel ? 1 : 0) + (selectedFlight ? 1 : 0);
 
   // Date selection state
@@ -60,26 +63,31 @@ const TripCart = ({ selectedHotel, selectedFlight, onRemoveHotel, onRemoveFlight
 
   const buildHotelLinks = () => {
     if (!selectedHotel) return [];
-    const q = encodeURIComponent(selectedHotel.name + " " + (data.destination || ""));
+    const hotelName = selectedHotel.name || "";
+    const dest = data.destination || "";
     const checkinStr = fmtDate(checkIn);
     const checkoutStr = fmtDate(checkOut);
+    const guests = data.isSolo ? 1 : (data.companions || 1);
+
+    const bookingQuery = encodeURIComponent(hotelName + " " + dest);
+    const googleQuery = encodeURIComponent(hotelName + " " + dest);
 
     return [
       {
         name: "Booking.com",
         url: datesSelected
-          ? `https://www.booking.com/searchresults.html?ss=${q}&checkin=${checkinStr}&checkout=${checkoutStr}`
-          : `https://www.booking.com/searchresults.html?ss=${q}`,
+          ? `https://www.booking.com/searchresults.pt-br.html?ss=${bookingQuery}&checkin=${checkinStr}&checkout=${checkoutStr}&group_adults=${guests}&no_rooms=1`
+          : `https://www.booking.com/searchresults.pt-br.html?ss=${bookingQuery}&group_adults=${guests}&no_rooms=1`,
       },
       {
         name: "Hotels.com",
         url: datesSelected
-          ? `https://www.hotels.com/search.do?q-destination=${q}&q-check-in=${checkinStr}&q-check-out=${checkoutStr}`
-          : `https://www.hotels.com/search.do?q-destination=${q}`,
+          ? `https://www.hotels.com/search.do?q-destination=${bookingQuery}&q-check-in=${checkinStr}&q-check-out=${checkoutStr}`
+          : `https://www.hotels.com/search.do?q-destination=${bookingQuery}`,
       },
       {
         name: "TripAdvisor",
-        url: `https://www.tripadvisor.com.br/Search?q=${q}`,
+        url: `https://www.tripadvisor.com.br/Search?q=${bookingQuery}`,
       },
     ];
   };
@@ -90,25 +98,21 @@ const TripCart = ({ selectedHotel, selectedFlight, onRemoveHotel, onRemoveFlight
     const dest = (data.destination || "").trim();
     const depDate = fmtDate(checkIn);
     const retDate = fmtDate(checkOut);
+    const passengers = data.isSolo ? 1 : (data.companions || 1);
 
+    // Use Google Flights and aggregators that have reliable URL structures
     return [
       {
         name: "GOL",
-        url: datesSelected
-          ? `https://www.voegol.com.br/passagens-aereas/${encodeURIComponent(origin)}/${encodeURIComponent(dest)}?departureDate=${depDate}&returnDate=${retDate}`
-          : `https://www.voegol.com.br/`,
+        url: `https://b2c.voegol.com.br/compra/busca-parceiros?ori=${encodeURIComponent(origin)}&des=${encodeURIComponent(dest)}&adt=${passengers}&chd=0&inf=0&type=RT`,
       },
       {
         name: "Azul",
-        url: datesSelected
-          ? `https://www.voeazul.com.br/passagens-aereas?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&departureDate=${depDate}&returnDate=${retDate}`
-          : `https://www.voeazul.com.br/`,
+        url: `https://www.voeazul.com.br/br/pt/home/selecao-voo?c[0].ds=${encodeURIComponent(origin)}&c[0].as=${encodeURIComponent(dest)}&c[0].dt=flex&c[1].ds=${encodeURIComponent(dest)}&c[1].as=${encodeURIComponent(origin)}&c[1].dt=flex&p[0].t=ADT&p[0].c=${passengers}`,
       },
       {
         name: "LATAM",
-        url: datesSelected
-          ? `https://www.latamairlines.com/br/pt/oferta-voos?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&outbound=${depDate}&inbound=${retDate}`
-          : `https://www.latamairlines.com/br/pt`,
+        url: `https://www.latamairlines.com/br/pt/oferta-voos?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&adt=${passengers}&chd=0&inf=0&trip=RT&cabin=Y&redemption=false&sort=RECOMMENDED`,
       },
     ];
   };
@@ -143,10 +147,33 @@ const TripCart = ({ selectedHotel, selectedFlight, onRemoveHotel, onRemoveFlight
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader className="text-left pb-4">
-            <SheetTitle className="font-heading text-xl flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-primary" />
-              🧳 Minha Trip
-            </SheetTitle>
+            <div className="flex items-center justify-between">
+              <SheetTitle className="font-heading text-xl flex items-center gap-2">
+                <ShoppingBag className="w-5 h-5 text-primary" />
+                🧳 Minha Trip
+              </SheetTitle>
+              {itemCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={() => {
+                    setOpen(false);
+                    navigate("/trip-summary", {
+                      state: {
+                        selectedHotel,
+                        selectedFlight,
+                        checkIn: checkIn ? fmtDateBR(checkIn) : undefined,
+                        checkOut: checkOut ? fmtDateBR(checkOut) : undefined,
+                      },
+                    });
+                  }}
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  Tela completa
+                </Button>
+              )}
+            </div>
           </SheetHeader>
 
           <div className="space-y-6">
@@ -459,6 +486,40 @@ const TripCart = ({ selectedHotel, selectedFlight, onRemoveHotel, onRemoveFlight
               preferences={data}
             />
 
+
+            {/* PDF Export Button */}
+            {(selectedHotel || selectedFlight) && (
+              <Button
+                variant="outline"
+                className="w-full gap-2 h-12 text-sm font-medium border-primary/30 hover:bg-primary/5"
+                onClick={() => {
+                  generateTripPdf({
+                    destination: data.destination,
+                    travelMonth: data.travelMonth,
+                    travelDays: data.travelDays,
+                    isSolo: data.isSolo,
+                    companions: data.companions,
+                    budgetMax: data.budgetMax,
+                    budgetType: data.budgetType,
+                    accommodationType: data.accommodationType,
+                    minStars: data.minStars,
+                    wantsBeachProximity: data.wantsBeachProximity,
+                    likesNightlife: data.likesNightlife,
+                    wantsFlights: data.wantsFlights,
+                    origin: data.origin,
+                    fareClass: data.fareClass,
+                    checkIn: checkIn ? fmtDateBR(checkIn) : undefined,
+                    checkOut: checkOut ? fmtDateBR(checkOut) : undefined,
+                    selectedHotel,
+                    selectedFlight,
+                  });
+                  toast.success("PDF gerado! Abrindo em nova aba...");
+                }}
+              >
+                <FileDown className="w-4 h-4" />
+                📄 Exportar Plano de Viagem (PDF)
+              </Button>
+            )}
 
             {/* Tip */}
             <div className="rounded-xl bg-accent/50 p-4 text-sm text-muted-foreground">

@@ -16,6 +16,7 @@ import StarsStep from "@/components/wizard/StarsStep";
 import FlightsStep from "@/components/wizard/FlightsStep";
 import NightlifeStep from "@/components/wizard/NightlifeStep";
 import AiQuestionsStep from "@/components/wizard/AiQuestionsStep";
+import MickeyEarsEasterEgg from "@/components/wizard/MickeyEarsEasterEgg";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useRef } from "react";
 
@@ -73,6 +74,7 @@ const Wizard = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <MickeyEarsEasterEgg destination={data.destination} />
       <div className="container mx-auto px-6 pt-20 pb-16 max-w-3xl">
         <button
           onClick={prev}

@@ -30,16 +30,16 @@ const formatDate = (dateStr?: string) => {
   return `${parts[2]}/${parts[1]}/${parts[0]}`;
 };
 
-const buildFlightAffiliateUrl = (origin: string, destination: string, partner: string) => {
+const buildFlightAffiliateUrl = (origin: string, destination: string, partner: string, departureDate?: string) => {
   const o = encodeURIComponent(origin);
   const d = encodeURIComponent(destination);
   switch (partner) {
     case "gol":
-      return `https://www.voegol.com.br/passagens-aereas/${o}/${d}`;
+      return `https://b2c.voegol.com.br/compra/busca-parceiros?ori=${o}&des=${d}&adt=1&chd=0&inf=0&type=RT`;
     case "azul":
-      return `https://www.voeazul.com.br/passagens-aereas?origin=${o}&destination=${d}`;
+      return `https://www.voeazul.com.br/br/pt/home/selecao-voo?c[0].ds=${o}&c[0].as=${d}&c[0].dt=flex&c[1].ds=${d}&c[1].as=${o}&c[1].dt=flex&p[0].t=ADT&p[0].c=1`;
     case "latam":
-      return `https://www.latamairlines.com/br/pt/oferta-voos?origin=${o}&destination=${d}`;
+      return `https://www.latamairlines.com/br/pt/oferta-voos?origin=${o}&inbound=null&outbound=null&destination=${d}&adt=1&chd=0&inf=0&trip=RT&cabin=Y&redemption=false&sort=RECOMMENDED`;
     default:
       return "#";
   }
@@ -135,7 +135,7 @@ const FlightCard = ({ airline, airlineLogo, departure, arrival, duration, stops,
           key={p.key}
           onClick={(e) => {
             e.stopPropagation();
-            window.open(buildFlightAffiliateUrl(origin, destination, p.key), "_blank", "noopener,noreferrer");
+            window.open(buildFlightAffiliateUrl(origin, destination, p.key, departureDate), "_blank", "noopener,noreferrer");
           }}
           className="text-[10px] text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
         >

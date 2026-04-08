@@ -24,10 +24,9 @@ export interface HotelCardProps {
 
 const buildAffiliateUrl = (hotelName: string, destination: string, partner: string) => {
   const q = encodeURIComponent(hotelName + " " + destination);
-  // Affiliate IDs will be appended here when available
   switch (partner) {
     case "booking":
-      return `https://www.booking.com/searchresults.html?ss=${q}&aid=AFFILIATE_ID`;
+      return `https://www.booking.com/searchresults.pt-br.html?ss=${q}&group_adults=1&no_rooms=1`;
     case "hotels":
       return `https://www.hotels.com/search.do?q-destination=${q}`;
     case "tripadvisor":
